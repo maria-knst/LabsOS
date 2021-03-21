@@ -1,7 +1,0 @@
-﻿  MyDll.cpp
-D:\OC\2Project\MyDll\MyDll.h(12,21): warning C4251: MyDllVector::x: class "MyStatLib::Number" должен иметь dll-интерфейс для использования клиентами class "MyDllVector"
-D:\OC\2Project\Project1\MyStatLib.h(5): message : см. объявление "MyStatLib::Number"
-D:\OC\2Project\MyDll\MyDll.h(13,21): warning C4251: MyDllVector::y: class "MyStatLib::Number" должен иметь dll-интерфейс для использования клиентами class "MyDllVector"
-D:\OC\2Project\Project1\MyStatLib.h(5): message : см. объявление "MyStatLib::Number"
-     ╤ючфрхЄё  сшсышюЄхър D:\OC\2Project\Debug\MYDLL.lib ш юс·хъЄ D:\OC\2Project\Debug\MYDLL.exp
-  MyDll.vcxproj -> D:\OC\2Project\Debug\MYDLL.dll
