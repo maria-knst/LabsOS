@@ -4,6 +4,7 @@
 #include<thread>
 #include<mutex>
 #include<vector>
+#include<queue>
 #include"Windows.h"
 #include"Multiply21.h"
 
@@ -30,24 +31,46 @@ std::vector<std::vector<double>> blockMultiply
 	else return A;
 }
 
+double threadMultiply(const std::vector<std::vector<double>>& first, const std::vector<std::vector<double>>& second,
+	std::vector<std::vector<double>>& result, int i, int j) {
+	double sum = 0;
+	for (int s = 0; s < first.size(); s++)
+	{
+		sum += first[i][s] * second[s][j];
+	}
+	result[i][j] =  sum;
+	ExitThread(0);
+}
 
-void multiply(Multiply21& p) {
+std::vector<std::vector<double>> Multiply2_1
+(const std::vector<std::vector<double>>& first, const std::vector<std::vector<double>>& second,int n,int m) {
+	std::queue<std::thread> threads;
+	int count = 0;
 
-	std::vector<double> row(p.sizeOfBlock, 0);
-	std::vector<std::vector<double>> sizeBlock(p.sizeOfBlock, row);
-
-
-	for (int i = 0; i < (p.n / p.sizeOfBlock); i++) {
-		sizeBlock = blockMultiply(p.A_, p.B_, p.n, p.sizeOfBlock, p.sizeOfBlock, p.n, p.nubmerOfIt * p.sizeOfBlock, 0, 0, i * p.sizeOfBlock);
-
-		for (int j = 0; j < p.sizeOfBlock; j++) {
-			for (int k = 0; k < p.sizeOfBlock; k++) {
-				p.result[j + p.sizeOfBlock * p.nubmerOfIt][k + p.sizeOfBlock * i] = sizeBlock[j][k];
+	std::vector<double> row(m, 0);
+	std::vector<std::vector<double>> result(n, row);
+	for (int i = 0; i < first.size(); i++)
+	{
+		for (int j = 0; j < second[0].size(); j++)
+		{
+			if (count < NumberOfThreads) {
+				threads.push(std::thread(threadMultiply, std::cref(first), std::cref(second), std::ref(result), i, j));
+				count++;
+			}
+			else {
+				threads.front().join();
+				threads.pop();
+				threads.push(std::thread(threadMultiply, std::cref(first), std::cref(second), std::ref(result), i, j));
 			}
 		}
-	}
 
-	return;
+	}
+	while (!threads.empty()) {
+		threads.front().join();
+		threads.pop();
+	}
+	return result;
+
 }
 
 
@@ -60,6 +83,7 @@ int main() {
 	std::vector<double> row(n, 0);
 	std::vector<std::vector<double>> A(n, row);
 	std::vector<std::vector<double>> B(n, row);
+	std::vector<std::vector<double>> res(n, row);
 
 
 	for (int i = 0; i < n; i++) {
@@ -85,22 +109,11 @@ int main() {
 	}
 
 	std::cout << (double)end / CLOCKS_PER_SEC << " sec." << '\n';
-
-
-	std::vector<std::vector<double>> C1(n,row);
-	
-	HANDLE* threads1 = new HANDLE[NumberOfThreads];
+	Multiply21 p(n, A, B, res, n / NumberOfThreads);
 
 	clock_t start1 = clock();
-	for (int i = 0; i < NumberOfThreads; i++) {
-		Multiply21 p(n, A, B, C1, n / NumberOfThreads, i);
-		//multiply(p);
-		threads1[i] = new thread(multiply,std::ref(p));
-	}
-	WaitForMultipleObjects(NumberOfThreads, threads1, true, INFINITE);
+	std::vector<std::vector<double>> C1 = Multiply2_1(p.A_,p.B_,p.n,p.n);
 	clock_t end1 = clock() - start1;
-
-	std::cout << (double)end1 / CLOCKS_PER_SEC << " sec." << '\n';
 
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++) {
@@ -109,19 +122,8 @@ int main() {
 		std::cout << '\n';
 	}
 
-
-	//случай - первая матрица разбита на строки, вторая на столбцы
-	/*start = clock();
-	for (int i = 0; i < NumberOfThreads; i++) {
-		void* p = new parameters_mult1(c, a, b, n / streams, i, n);
-		handle1[i] = CreateThread(NULL, 0, &mult1, p, 0, NULL);
-	}
-	WaitForMultipleObjects(streams, handle1, true, INFINITE);
-	end = clock();
-	if (print_matricies)
-		print_matrix(c, n);
-	std::cout << (double)(end - start) * 1000 / (double)CLOCKS_PER_SEC << "ms\n\n";
-	*/
+	std::cout << (double)end / CLOCKS_PER_SEC << " sec." << '\n';
+	
 	in.close();
 	return 0;
 	
