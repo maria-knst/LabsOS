@@ -1,0 +1,6 @@
+g++ -o M M.cpp
+g++ -o A A.cpp
+g++ -o P P.cpp
+g++ -o S S.cpp
+g++ -o main PipeMain.cpp
+./main
